@@ -29,6 +29,7 @@ public class RecipeController {
      */
     @PostMapping
     public ResponseEntity<Recipe> addRecipe(@RequestBody RecipeRequest recipeRequest) {
+        logger.info("Received request to add recipe: {}", recipeRequest);
         try {
             Recipe toSave = RecipeRegistry.createFromRequest(recipeRequest);
             Recipe saved = recipeService.addRecipe(toSave);
@@ -38,9 +39,10 @@ public class RecipeController {
                     .path("/{id}")                  // /{id}
                     .buildAndExpand(saved.getId())
                     .toUri();
-
+           logger.debug("Recipe created with ID: {}", saved.getId());
             return ResponseEntity.created(location).body(saved);
         } catch (Exception e) {
+            logger.error("Error adding recipe", e);
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -50,6 +52,7 @@ public class RecipeController {
      */
     @GetMapping
     public ResponseEntity<List<Recipe>> getAllRecipes() {
+        logger.info("Received request to get all recipes");
         return ResponseEntity.ok(recipeService.getAllRecipes());
     }
 
@@ -58,6 +61,7 @@ public class RecipeController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<Recipe> getRecipeById(@PathVariable long id) {
+        logger.info("Received request to get recipe by ID: {}", id);
         return recipeService.getRecipeById(id)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
@@ -68,12 +72,15 @@ public class RecipeController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteRecipe(@PathVariable long id) {
+        logger.info("Received request to delete recipe with ID: {}", id);
         try {
             boolean deleted = recipeService.deleteRecipe(id);
+            logger.debug("Recipe deletion status for ID {}: {}", id, deleted);
             return deleted
                     ? ResponseEntity.noContent().build()
                     : ResponseEntity.notFound().build();
         } catch (Exception e) {
+            logger.error("Error deleting recipe with ID: {}", id, e);
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -83,10 +90,18 @@ public class RecipeController {
      */
     @PutMapping("/{id}")
     public ResponseEntity<Recipe> updateRecipe(@PathVariable long id, @RequestBody RecipeRequest updatedRequest) {
+        logger.info("Received request to update recipe with ID: {}", id);
+        try {
         Recipe updatedRecipe = RecipeRegistry.createFromRequest(updatedRequest);
-        return recipeService.updateRecipe(id, updatedRecipe)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        logger.debug("Updating recipe with data: {}", updatedRecipe);
+            return recipeService.updateRecipe(id, updatedRecipe)
+                    .map(ResponseEntity::ok)
+                    .orElseGet(() -> ResponseEntity.notFound().build());
+        } catch (Exception e) {
+            logger.error("Error updating recipe with ID: {}", id, e);
+            return ResponseEntity.internalServerError().build();
+        }
+
     }
 
     /**
@@ -94,9 +109,16 @@ public class RecipeController {
      */
     @PatchMapping("/{id}")
     public ResponseEntity<Recipe> patchRecipe(@PathVariable long id, @RequestBody RecipeRequest partialRequest) {
-        Recipe partialRecipe = RecipeRegistry.createFromRequest(partialRequest);
-        return recipeService.patchRecipe(id, partialRecipe)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        logger.info("Received request to patch recipe with ID: {}", id);
+        try {
+            Recipe partialRecipe = RecipeRegistry.createFromRequest(partialRequest);
+            logger.debug("Patching recipe with data: {}", partialRecipe);
+            return recipeService.patchRecipe(id, partialRecipe)
+                    .map(ResponseEntity::ok)
+                    .orElseGet(() -> ResponseEntity.notFound().build());
+        } catch (Exception e) {
+            logger.error("Error patching recipe with ID: {}", id, e);
+            return ResponseEntity.internalServerError().build();
+        }
     }
 }

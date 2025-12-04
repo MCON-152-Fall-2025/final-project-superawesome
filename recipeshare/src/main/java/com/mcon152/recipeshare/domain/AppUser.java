@@ -1,7 +1,7 @@
 package com.mcon152.recipeshare.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -9,15 +9,14 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "app_users")
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "password", "username", "createdAt", "updatedAt"})
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "createdAt", "updatedAt"})
+@JsonSerialize(using = AppUserSerializer.class)
 public class AppUser extends BaseEntity {
 
     @Column(nullable = false, unique = true, length = 50)
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String username;
 
     @Column(nullable = false)
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
     @Column(length = 100)
